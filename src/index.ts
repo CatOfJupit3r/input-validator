@@ -1,1 +1,5 @@
-export const myPackage = (taco = ''): string => `${taco} from my package`;
+import InputValidator from './inputValidator'
+import { Schema } from './models/Schema'
+
+export { InputValidator, Schema }
+export default InputValidator
