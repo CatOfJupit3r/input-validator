@@ -1,4 +1,4 @@
-import { Input, Schema, SupportedTypes, TypeMapping } from './models/Schema'
+import { Input, SchemaBlueprint, SchemaRules, SchemaDefinition, SupportedTypes, TypeMapping } from '../models/SchemaTypes'
 import {
     EXCESS_KEYS_INPUT,
     FailedValidation,
@@ -7,22 +7,27 @@ import {
     SuccessfulValidation,
     VALID_INPUT,
     WRONG_TYPE_INPUT,
-} from './models/ValidationResults'
+} from '../models/ValidationResults'
 
-class InputValidator {
-    public isOfSchema<T extends Schema>(
-        input: Input<T>,
-        expected: T
-    ): FailedValidation | SuccessfulValidation<{ [K in keyof T]: TypeMapping[T[K]] }> {
+export class Schema<T extends SchemaDefinition> implements SchemaBlueprint<T> {
+    private readonly schema: T
+    private readonly rules: SchemaRules
+
+    constructor(schema: T, rules?: SchemaRules) {
+        this.schema = schema
+        this.rules = rules || {}
+    }
+
+    public check(input: Input<T>): FailedValidation | SuccessfulValidation<{ [K in keyof T]: TypeMapping[T[K]] }> {
         try {
             const inputKeysLength = Object.keys(input).length
-            const expectedKeysLength = Object.keys(expected).length
+            const expectedKeysLength = Object.keys(this.schema).length
             if (inputKeysLength < expectedKeysLength) {
                 return MISSING_KEYS_INPUT()
-            } else if (inputKeysLength > expectedKeysLength) {
+            } else if (inputKeysLength > expectedKeysLength && !this.rules.excess?.allow) {
                 return EXCESS_KEYS_INPUT()
             }
-            for (const [key, type] of Object.entries(expected)) {
+            for (const [key, type] of Object.entries(this.schema)) {
                 if (input[key] === undefined) {
                     return WRONG_TYPE_INPUT()
                 }
@@ -37,7 +42,7 @@ class InputValidator {
         }
     }
 
-    public isOfType<T extends SupportedTypes>(
+    private isOfType<T extends SupportedTypes>(
         // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
         value: any,
         expectedType: T
@@ -61,6 +66,8 @@ class InputValidator {
             return INTERNAL_ERROR()
         }
     }
-}
 
-export default InputValidator
+    public length(): number {
+        return Object.keys(this.schema).length
+    }
+}
