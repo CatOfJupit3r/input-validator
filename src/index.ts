@@ -1,5 +1,18 @@
-import InputValidator from './inputValidator'
-import { Schema } from './models/Schema'
+import { SchemaRules, SchemaDefinition } from './models/SchemaTypes'
+import { SchemaFieldDefinition, ValidationRules } from './models/ExtendedSchemaTypes'
 
-export { InputValidator, Schema }
-export default InputValidator
+import { ExtendedSchema } from './classes/ExtendedSchema'
+import { Schema } from './classes/Schema'
+
+import { FailedValidation, SuccessfulValidation } from './models/ValidationResults'
+
+export {
+    Schema,
+    SchemaDefinition,
+    SchemaRules,
+    ExtendedSchema,
+    SchemaFieldDefinition as ExtendedSchemaFieldDefinition,
+    ValidationRules as ExtendedSchemaRules,
+    FailedValidation,
+    SuccessfulValidation,
+}
