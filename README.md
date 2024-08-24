@@ -66,7 +66,7 @@ But, I doubt I will fix it myself...
 
 [npm-url]:https://www.npmjs.com/package/just-enough-schemas
 
-[issues-img]:https://img.shields.io/github/issues/ryansonshine/just-enough-schemas
+[issues-img]:https://img.shields.io/github/issues/CatOfJupit3r/just-enough-schemas
 
 [issues-url]:https://github.com/CatOfJupit3r/just-enough-schemas/issues
 
