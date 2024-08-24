@@ -1,5 +1,4 @@
-import { SuccessfulValidation } from '../src'
-import { ExtendedSchema } from '../src'
+import { ExtendedSchema, SuccessfulValidation } from '../src'
 
 interface TestSchemaInterface {
     name: string
@@ -120,6 +119,41 @@ describe('Extended Schema', () => {
         const objectToCheck = 'John'
 
         const result = schema.check(objectToCheck as any)
+
+        expect(result).toHaveProperty('success', false)
+    })
+
+    test('Custom validation callback', () => {
+        const schema = new ExtendedSchema<TestSchemaInterface>()
+        schema.addStringField('name', {
+            callback: value => value.length > 3,
+        })
+
+        const objectToCheck = {
+            name: 'John',
+        }
+
+        const result = schema.check(objectToCheck)
+
+        expect(result).toEqual({
+            success: true,
+            value: objectToCheck,
+        } as SuccessfulValidation<{ name: string }>)
+    })
+
+    test('Callback does not trigger exceptions, but returns validation fail', () => {
+        const schema = new ExtendedSchema<TestSchemaInterface>()
+        schema.addStringField('name', {
+            callback: value => {
+                throw new Error('Error')
+            },
+        })
+
+        const objectToCheck = {
+            name: 'John',
+        }
+
+        const result = schema.check(objectToCheck)
 
         expect(result).toHaveProperty('success', false)
     })

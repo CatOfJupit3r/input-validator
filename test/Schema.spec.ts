@@ -12,7 +12,6 @@ describe('Schema', () => {
             age: 30,
         }
         const result = NameAgeSchema.check(input)
-        // const result = validator.isOfSchema(input, schema)
         expect(result).toEqual({
             success: true,
             value: input,
