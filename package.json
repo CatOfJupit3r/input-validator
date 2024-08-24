@@ -1,7 +1,7 @@
 {
     "name" : "just-enough-schemas",
     "version" : "0.0.0-development",
-    "description" : "A library, written in TypeScript, that provides a reliable way to check JavaScript Object.",
+    "description" : "Utility tool to validate JavaScript Object.",
     "main" : "./lib/index.js",
     "files" : [
         "lib/**/*"
@@ -19,12 +19,12 @@
     },
     "repository" : {
         "type" : "git",
-        "url" : "git+https://github.com/CatOfJupit3r/just-enought-schemas.git"
+        "url" : "git+https://github.com/CatOfJupit3r/just-enough-schemas.git"
     },
     "license" : "MIT",
     "author" : {
         "name" : "Roman Barmak",
-        "url" : "https://github.com/CatOfJupit3r/just-enought-schemas"
+        "url" : "https://github.com/CatOfJupit3r/just-enough-schemas"
     },
     "engines" : {
         "node" : ">=12.0"
@@ -41,9 +41,9 @@
         "codecov"
     ],
     "bugs" : {
-        "url" : "https://github.com/CatOfJupit3r/just-enought-schemas/issues"
+        "url" : "https://github.com/CatOfJupit3r/just-enough-schemas/issues"
     },
-    "homepage" : "https://github.com/CatOfJupit3r/just-enought-schemas#readme",
+    "homepage" : "https://github.com/CatOfJupit3r/just-enough-schemas#readme",
     "devDependencies" : {
         "@ryansonshine/commitizen" : "^4.2.8",
         "@ryansonshine/cz-conventional-changelog" : "^3.3.4",

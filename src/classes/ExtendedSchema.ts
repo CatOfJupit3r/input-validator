@@ -62,14 +62,16 @@ export class ExtendedSchema<ImpliedType> implements SchemaBlueprint<ImpliedType>
     public check(value: Record<string, unknown>): SuccessfulValidation<ImpliedType> | FailedValidation {
         try {
             if (!valueIsObject(value)) {
-                return WRONG_TYPE_INPUT()
+                return WRONG_TYPE_INPUT("The value isn't an object, but " + typeof value)
             }
 
             const valueKeys = Object.keys(value)
             const schemaKeys = Object.keys(this.fields)
-
             if (valueKeys.length > schemaKeys.length && this.rules?.excess === 'forbid') {
-                return EXCESS_KEYS_INPUT()
+                return EXCESS_KEYS_INPUT(
+                    'Schema does not allow excess keys. Excess keys: ' +
+                        valueKeys.filter(k => !schemaKeys.includes(k)).join(', ')
+                )
             }
 
             const cleanValue = { ...value }
@@ -82,11 +84,11 @@ export class ExtendedSchema<ImpliedType> implements SchemaBlueprint<ImpliedType>
 
                 if (valueToCheck === undefined) {
                     if (!field.undefined || field.undefined === 'forbid') {
-                        return WRONG_TYPE_INPUT()
+                        return WRONG_TYPE_INPUT('Schema forbids undefined values. Key: ' + key)
                     }
 
                     if (field.callback && !field.callback(valueToCheck)) {
-                        return WRONG_TYPE_INPUT()
+                        return WRONG_TYPE_INPUT('Callback failed. Key: ' + key)
                     }
 
                     encounteredKeys.add(key)
@@ -105,31 +107,30 @@ export class ExtendedSchema<ImpliedType> implements SchemaBlueprint<ImpliedType>
                     }
                     if (typeToCheck === 'extSchema' && valueIsObject(valueToCheck)) {
                         if (!('schema' in field) || field?.schema === undefined) {
-                            return INTERNAL_ERROR()
+                            return INTERNAL_ERROR('Schema is not defined for key: ' + key)
                         }
                         const result = field.schema.check(valueToCheck)
 
                         if (!result.success) {
-                            return WRONG_TYPE_INPUT()
+                            return WRONG_TYPE_INPUT('Nested schema failed. Key: ' + key)
                         }
                         continue
                     }
                     if ((typeToCheck === 'object' || typeToCheck === 'extSchema') && valueIsObject(valueToCheck)) {
                         continue
                     }
-                    return WRONG_TYPE_INPUT()
+                    return WRONG_TYPE_INPUT('Type mismatch. Key: ' + key)
                 }
 
                 if (field.callback && !field.callback(valueToCheck)) {
-                    return WRONG_TYPE_INPUT()
+                    return WRONG_TYPE_INPUT('Callback failed. Key: ' + key)
                 }
 
                 encounteredKeys.add(key)
             }
 
             if (encounteredKeys.size < schemaKeys.length) {
-                console.log(encounteredKeys, schemaKeys)
-                return MISSING_KEYS_INPUT()
+                return MISSING_KEYS_INPUT('Missing keys: ' + schemaKeys.filter(k => !encounteredKeys.has(k)).join(', '))
             }
 
             if (this.rules?.excess === 'clean') {
@@ -142,23 +143,13 @@ export class ExtendedSchema<ImpliedType> implements SchemaBlueprint<ImpliedType>
 
             return VALID_INPUT<ImpliedType>(cleanValue as unknown as ImpliedType)
         } catch (error) {
-            console.log(error)
-            return INTERNAL_ERROR()
+            console.debug(error)
+            return INTERNAL_ERROR('Internal error')
         }
     }
 
     public length(): number {
         return Object.keys(this.fields).length
-    }
-
-    public toObject(): Record<string, unknown> {
-        // we convert the schema to TypeScript like type
-        const obj: Record<string, unknown> = {}
-        for (const [key, field] of Object.entries(this.fields)) {
-            if (field.typesToCheck)
-                obj[key] = field.typesToCheck.length === 1 ? field.typesToCheck[0] : field.typesToCheck.join(' | ')
-        }
-        return obj
     }
 
     /* SUGAR */
@@ -212,52 +203,43 @@ export class ExtendedSchema<ImpliedType> implements SchemaBlueprint<ImpliedType>
         })
     }
 
-    public addFalsyField(key: string, options?: addFieldOptions<any>): void {
-        this.addBooleanField(
-            key,
-            {
-                callback: (value: any) => {
-                    return !value
-                },
-                undefined: options?.undefined,
-            }
-        )
+    public addFalsyField(key: string, options?: addFieldOptions<boolean>): void {
+        this.addBooleanField(key, {
+            callback: (value: any) => {
+                return !value
+            },
+            undefined: options?.undefined,
+        })
     }
 
-    public addTruthyField(key: string, options?: addFieldOptions<any>): void {
-        this.addBooleanField(
-            key,
-            {
-                callback: (value: any) => {
-                    return !!value
-                },
-                undefined: options?.undefined,
-            }
-        )
+    public addTruthyField(key: string, options?: addFieldOptions<boolean>): void {
+        this.addBooleanField(key, {
+            callback: (value: any) => {
+                return !!value
+            },
+            undefined: options?.undefined,
+        })
     }
 
-    public addArrayOfElementsField(
+    public addArrayOfElementsField<K>(
         key: string,
-        elementSchema: SchemaBlueprint<any>,
-        options?: addFieldOptions<Array<any>>
+        elementSchema: SchemaBlueprint<K>,
+        options?: addFieldOptions<Array<K>>
     ): void {
-        this.addArrayField(
-            key,
-            {
-                callback: (value: any) => {
-                    if (!Array.isArray(value)) {
+        this.addArrayField(key, {
+            callback: (value: Array<K>) => {
+                if (!Array.isArray(value)) {
+                    return false
+                }
+                for (const element of value) {
+                    const result = elementSchema.check(element)
+                    if (!result.success) {
                         return false
                     }
-                    for (const element of value) {
-                        const result = elementSchema.check(element)
-                        if (!result.success) {
-                            return false
-                        }
-                    }
-                    return !options?.callback || options.callback(value)
-                },
-                undefined: options?.undefined,
-            }
-        )
+                }
+                return !options?.callback || options.callback(value)
+            },
+            undefined: options?.undefined,
+        })
     }
 }
