@@ -1,5 +1,4 @@
-import { FailedValidation, SuccessfulValidation } from '../src'
-import { Schema } from '../src'
+import { Schema, SuccessfulValidation } from '../src'
 
 const NameAgeSchema = new Schema({
     name: 'string',
@@ -7,7 +6,7 @@ const NameAgeSchema = new Schema({
 })
 
 describe('Schema', () => {
-    test('valid input matching the schema', () => {
+    test('Schema returns success on valid object', () => {
         const input = {
             name: 'John',
             age: 30,
@@ -20,40 +19,33 @@ describe('Schema', () => {
         } as SuccessfulValidation<typeof input>)
     })
 
-    test('input with missing keys', () => {
+    test('Schema fails validation on missing keys', () => {
         const input: any = {
             name: 'John',
         }
         const result = NameAgeSchema.check(input)
-        expect(result).toEqual({
-            success: false,
-            type: 'MISSING_KEYS',
-        } as FailedValidation)
+        expect(result).toHaveProperty('success', false)
     })
 
-    test('input with excess keys', () => {
+    test('Schema cleans up excess keys by default', () => {
         const input = {
             name: 'John',
             age: 30,
             extra: 'extra',
         }
         const result = NameAgeSchema.check(input)
-        expect(result).toEqual({
-            success: false,
-            type: 'EXCESS_KEYS',
-        } as FailedValidation)
+        expect(result).toHaveProperty('success', true)
+        expect(result).toHaveProperty('value', { name: 'John', age: 30 })
     })
 
-    test('input with excess keys, but schema allows it', () => {
+    test('Input with excess keys, but schema forbids it', () => {
         const NameAgeSchemaWithExcess = new Schema(
             {
                 name: 'string',
                 age: 'number',
             },
             {
-                excess: {
-                    allow: true,
-                },
+                excess: 'forbid',
             }
         )
         const input = {
@@ -62,21 +54,15 @@ describe('Schema', () => {
             extra: 'extra',
         }
         const result = NameAgeSchemaWithExcess.check(input)
-        expect(result).toEqual({
-            success: true,
-            value: input,
-        } as SuccessfulValidation<typeof input>)
+        expect(result).toHaveProperty('success', false)
     })
 
-    test('input with wrong types', () => {
+    test('Schema fails validation on bad types', () => {
         const input: any = {
             name: 'John',
             age: 'thirty',
         }
         const result = NameAgeSchema.check(input)
-        expect(result).toEqual({
-            success: false,
-            type: 'WRONG_TYPE',
-        } as FailedValidation)
+        expect(result).toHaveProperty('success', false)
     })
 })

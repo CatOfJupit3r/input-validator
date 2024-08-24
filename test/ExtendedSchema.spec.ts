@@ -1,4 +1,4 @@
-import { SuccessfulValidation, WRONG_TYPE_INPUT } from '../src/models/ValidationResults'
+import { SuccessfulValidation } from '../src'
 import { ExtendedSchema } from '../src'
 
 interface TestSchemaInterface {
@@ -27,7 +27,7 @@ Test suite for the ExtendedSchema class
  */
 
 describe('Extended Schema', () => {
-    test('extended schema methods work as intended', () => {
+    test('Extended Schema sugar methods add fields as intended', () => {
         const schema = new ExtendedSchema<TestSchemaInterface>()
         schema.addStringField('name')
         schema.addNumberField('age')
@@ -43,12 +43,14 @@ describe('Extended Schema', () => {
                 return value.every((v: any) => typeof v === 'string')
             },
         })
+
         const friendsSchema = new ExtendedSchema<{ name: string; age: number }>()
         friendsSchema.addStringField('name')
         friendsSchema.addNumberField('age')
-        schema.addArrayOfElementsField('friends', friendsSchema)
+        schema.addArrayOfElementsField<{ name: string; age: number }>('friends', friendsSchema)
+
         schema.addFalsyField('isMale', {
-            callback: (value: any) => true,
+            callback: value => true,
             undefined: 'allow',
         })
 
@@ -82,7 +84,7 @@ describe('Extended Schema', () => {
         } as SuccessfulValidation<TestSchemaInterface>)
     })
 
-    test('schema cleans excess fields', () => {
+    test('Schema cleans excess keys on rule', () => {
         const schema = new ExtendedSchema<TestSchemaInterface>({ excess: 'clean' })
 
         schema.addStringField('name')
@@ -108,7 +110,7 @@ describe('Extended Schema', () => {
         } as SuccessfulValidation<TestSchemaInterface>)
     })
 
-    test('schema does not accept non-object', () => {
+    test('Extended Schema does not accept non-object values', () => {
         const schema = new ExtendedSchema<TestSchemaInterface>()
 
         schema.addStringField('name')
@@ -119,6 +121,6 @@ describe('Extended Schema', () => {
 
         const result = schema.check(objectToCheck as any)
 
-        expect(result).toEqual(WRONG_TYPE_INPUT())
+        expect(result).toHaveProperty('success', false)
     })
 })

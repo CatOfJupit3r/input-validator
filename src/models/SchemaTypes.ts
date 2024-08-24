@@ -24,9 +24,8 @@ export type SchemaBlueprint<T extends SchemaDefinition> = {
     length(): number
 }
 
+type EXCESS_ALLOW_FLAGS = 'keep' | 'clean' | 'forbid'
+
 export type SchemaRules = {
-    excess?: {
-        allow?: boolean
-        noClean?: boolean
-    }
+    excess?: EXCESS_ALLOW_FLAGS
 }
