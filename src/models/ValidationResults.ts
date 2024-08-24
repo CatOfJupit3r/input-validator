@@ -3,7 +3,7 @@ export interface SuccessfulValidation<T = any> {
     value: T
 }
 
-type TypeOfFailure = 'WRONG_TYPE' | 'MISSING_KEYS' | 'EXCESS_KEYS' | 'INTERNAL_ERROR'
+type TypeOfFailure = 'WRONG_TYPE' | 'MISSING_KEYS' | 'EXCESS_KEYS' | 'INTERNAL_ERROR' | 'CALLBACK_FAILED'
 
 export interface FailedValidation {
     success: false
@@ -28,4 +28,7 @@ export const EXCESS_KEYS_INPUT = (message: string): FailedValidation => {
 }
 export const INTERNAL_ERROR = (message: string): FailedValidation => {
     return INVALID_INPUT('INTERNAL_ERROR', message)
+}
+export const CALLBACK_FAILED = (message: string): FailedValidation => {
+    return INVALID_INPUT('CALLBACK_FAILED', message)
 }
