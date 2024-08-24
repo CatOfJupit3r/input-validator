@@ -58,15 +58,15 @@ But, I doubt I will fix it myself...
 
 [build-url]:https://github.com/CatOfJupit3r/just-enough-schemas/actions/workflows/release.yml
 
-[downloads-img]:https://img.shields.io/npm/dt/typescript-npm-package-template
+[downloads-img]:https://img.shields.io/npm/d18m/just-enough-schemas
 
-[downloads-url]:https://www.npmtrends.com/typescript-npm-package-template
+[downloads-url]:https://npmtrends.com/just-enough-schemas
 
-[npm-img]:https://img.shields.io/npm/v/typescript-npm-package-template
+[npm-img]:https://img.shields.io/npm/v/just-enough-schemas
 
 [npm-url]:https://www.npmjs.com/package/just-enough-schemas
 
-[issues-img]:https://img.shields.io/github/issues/ryansonshine/typescript-npm-package-template
+[issues-img]:https://img.shields.io/github/issues/ryansonshine/just-enough-schemas
 
 [issues-url]:https://github.com/CatOfJupit3r/just-enough-schemas/issues
 
