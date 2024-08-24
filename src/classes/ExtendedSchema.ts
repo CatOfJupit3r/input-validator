@@ -5,6 +5,7 @@ import {
     ValidationRules,
 } from '../models/ExtendedSchemaTypes'
 import {
+    CALLBACK_FAILED,
     EXCESS_KEYS_INPUT,
     FailedValidation,
     INTERNAL_ERROR,
@@ -88,7 +89,7 @@ export class ExtendedSchema<ImpliedType> implements SchemaBlueprint<ImpliedType>
                     }
 
                     if (field.callback && !field.callback(valueToCheck)) {
-                        return WRONG_TYPE_INPUT('Callback failed. Key: ' + key)
+                        return CALLBACK_FAILED('Callback failed. Key: ' + key)
                     }
 
                     encounteredKeys.add(key)
@@ -123,7 +124,7 @@ export class ExtendedSchema<ImpliedType> implements SchemaBlueprint<ImpliedType>
                 }
 
                 if (field.callback && !field.callback(valueToCheck)) {
-                    return WRONG_TYPE_INPUT('Callback failed. Key: ' + key)
+                    return CALLBACK_FAILED('Callback failed. Key: ' + key)
                 }
 
                 encounteredKeys.add(key)
