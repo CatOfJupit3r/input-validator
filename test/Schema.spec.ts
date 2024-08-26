@@ -64,4 +64,12 @@ describe('Schema', () => {
         const result = NameAgeSchema.check(input)
         expect(result).toHaveProperty('success', false)
     })
+
+    test('Schema toJSON() return valid object', () => {
+        const result = NameAgeSchema.toJSON()
+        expect(result).toEqual({
+            name: 'string',
+            age: 'number',
+        })
+    })
 })

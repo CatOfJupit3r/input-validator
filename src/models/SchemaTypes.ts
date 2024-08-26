@@ -1,6 +1,6 @@
 import { FailedValidation, SuccessfulValidation } from './ValidationResults'
 
-export type SupportedTypes = 'string' | 'number' | 'boolean' | 'object' | 'array' | 'any'
+export type SupportedTypes = 'string' | 'number' | 'boolean' | 'object' | 'array' | 'null' | 'any'
 
 export type TypeMapping = {
     string: string
@@ -8,6 +8,7 @@ export type TypeMapping = {
     boolean: boolean
     object: Record<string, unknown>
     array: any[]
+    null: null
     any: any
 }
 
@@ -22,6 +23,7 @@ export type Input<T extends SchemaDefinition> = {
 export type SchemaBlueprint<T extends SchemaDefinition> = {
     check(value: Input<T>): FailedValidation | SuccessfulValidation<{ [K in keyof T]: TypeMapping[T[K]] }>
     length(): number
+    toJSON(): Record<string, unknown>
 }
 
 type EXCESS_ALLOW_FLAGS = 'keep' | 'clean' | 'forbid'

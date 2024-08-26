@@ -5,6 +5,8 @@ interface TestSchemaInterface {
     email: string
     age: number
     phone: string
+    children: number | null
+    jobTitle: string | null
 
     address: {
         notifications: boolean
@@ -16,6 +18,7 @@ interface TestSchemaInterface {
         age: number
     }[]
     isMale?: boolean
+    reserved: null
 }
 
 /*
@@ -31,7 +34,12 @@ describe('Extended Schema', () => {
         schema.addStringField('name')
         schema.addNumberField('age')
         schema.addEmailField('email')
-        schema.addRegexField('phone', /^(\([0-9]{3}\) |[0-9]{3}-)[0-9]{3}-[0-9]{4}$/gm)
+        schema.addRegexField('phone', /^(\([0-9]{3}\) |[0-9]{3}-)[0-9]{3}-[0-9]{4}$/gm, {
+            displayedAs: 'US phone number',
+        })
+        schema.addNullableField('children', ['number'])
+        schema.addNullableField('jobTitle', ['string'])
+
         const addressSchema = new ExtendedSchema<{ notifications: boolean; theme: string }>()
         addressSchema.addBooleanField('notifications')
         addressSchema.addStringField('theme')
@@ -52,12 +60,15 @@ describe('Extended Schema', () => {
             callback: value => true,
             undefined: 'allow',
         })
+        schema.addNullField('reserved')
 
         const objectToCheck = {
             name: 'John',
             email: 'fakeemail@gmail.com',
             age: 30,
             phone: '123-456-7890',
+            children: null,
+            jobTitle: null,
             address: {
                 notifications: true,
                 theme: 'dark',
@@ -73,6 +84,7 @@ describe('Extended Schema', () => {
                     age: 35,
                 },
             ],
+            reserved: null,
         }
 
         const result = schema.check(objectToCheck)
@@ -81,6 +93,20 @@ describe('Extended Schema', () => {
             success: true,
             value: objectToCheck,
         } as SuccessfulValidation<TestSchemaInterface>)
+        expect(schema.length()).toBe(11)
+        expect(schema.toJSON()).toEqual({
+            name: 'string',
+            age: 'number',
+            email: 'email',
+            children: 'number | null',
+            jobTitle: 'string | null',
+            phone: 'US phone number',
+            address: { notifications: 'boolean', theme: 'string' },
+            groups: 'array (callback)',
+            friends: 'array<{"name":"string","age":"number"}>',
+            'isMale?': 'false',
+            reserved: 'null',
+        })
     })
 
     test('Schema cleans excess keys on rule', () => {
@@ -139,6 +165,55 @@ describe('Extended Schema', () => {
             success: true,
             value: objectToCheck,
         } as SuccessfulValidation<{ name: string }>)
+    })
+
+    test('Custom validation callback with array return on error', () => {
+        const schema = new ExtendedSchema<TestSchemaInterface>()
+        schema.addStringField('name', {
+            callback: value => {
+                if (value.length > 3) {
+                    return true
+                }
+                return [false, 'Name should be longer than 3 characters']
+            },
+        })
+
+        const objectToCheck = {
+            name: 'Joe',
+        }
+
+        const result = schema.check(objectToCheck)
+
+        expect(result).toEqual({
+            success: false,
+            type: 'CALLBACK_FAILED',
+            message: 'Name should be longer than 3 characters',
+        })
+    })
+
+    test('Callback that return bad values handled gracefully', () => {
+        const schema = new ExtendedSchema<TestSchemaInterface>()
+        schema.addStringField('name', {
+            callback: value => {
+                if (value.length > 3) {
+                    return true
+                }
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+                return [false, 1] as unknown as any
+            },
+        })
+
+        const objectToCheck = {
+            name: 'Joe',
+        }
+
+        const result = schema.check(objectToCheck)
+
+        expect(result).toEqual({
+            success: false,
+            type: 'INTERNAL_ERROR',
+            message: 'Internal error',
+        })
     })
 
     test('Callback does not trigger exceptions, but returns validation fail', () => {

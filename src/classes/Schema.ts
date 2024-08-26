@@ -78,7 +78,12 @@ export class Schema<T extends SchemaDefinition> implements SchemaBlueprint<T> {
                 if (!Array.isArray(value)) {
                     return WRONG_TYPE_INPUT('Type mismatch. Expected array, got ' + typeof value)
                 }
-            } else if (typeof value !== expectedType) {
+            } else if (expectedType === 'null') {
+                if (value !== null) {
+                    return WRONG_TYPE_INPUT('Type mismatch. Expected null, got ' + typeof value)
+                }
+            }
+            else if (typeof value !== expectedType) {
                 return WRONG_TYPE_INPUT('Type mismatch. Expected ' + expectedType + ', got ' + typeof value)
             }
             return VALID_INPUT(value as TypeMapping[T])
@@ -89,5 +94,9 @@ export class Schema<T extends SchemaDefinition> implements SchemaBlueprint<T> {
 
     public length(): number {
         return Object.keys(this.schema).length
+    }
+
+    public toJSON(): Record<string, unknown> {
+        return this.schema
     }
 }
