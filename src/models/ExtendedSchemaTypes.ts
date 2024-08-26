@@ -2,15 +2,17 @@ import { FailedValidation, SuccessfulValidation } from './ValidationResults'
 
 type SupportedTypes = 'string' | 'number' | 'boolean' | 'object' | 'array' | 'null'
 
+type SchemaCallback = (value: any) => boolean | [boolean, string]
+
 export interface SchemaFieldDefinition {
     typesToCheck: Array<SupportedTypes>
-    callback?: (value: any) => boolean
+    callback?: SchemaCallback
     undefined?: 'allow' | 'forbid'
 }
 
 export interface NestedSchemaField {
     typesToCheck: ['extSchema']
-    callback?: (value: any) => boolean
+    callback?: SchemaCallback
     undefined?: 'allow' | 'forbid'
     schema: SchemaBlueprint<any>
 }

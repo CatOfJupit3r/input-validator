@@ -24,7 +24,7 @@ const valueIsObject = (value: any): value is Record<string, unknown> => {
 }
 
 type addFieldOptions<T = any> = {
-    callback?: (value: T) => boolean
+    callback?: (value: T) => boolean | [boolean, string]
     undefined?: 'allow' | 'forbid'
 }
 
@@ -126,8 +126,27 @@ export class ExtendedSchema<ImpliedType> implements SchemaBlueprint<ImpliedType>
                     return WRONG_TYPE_INPUT('Type mismatch. Key: ' + key)
                 }
 
-                if (field.callback && !field.callback(valueToCheck)) {
-                    return CALLBACK_FAILED('Callback failed. Key: ' + key)
+                if (field.callback) {
+                    const callbackResult = field.callback(valueToCheck)
+                    if (!callbackResult) {
+                        return CALLBACK_FAILED('Callback failed. Key: ' + key)
+                    } else if (Array.isArray(callbackResult)) {
+                        if (
+                            callbackResult.length !== 2 ||
+                            typeof callbackResult[0] !== 'boolean' ||
+                            typeof callbackResult[1] !== 'string'
+                        ) {
+                            console.debug(
+                                'Extended Schema encountered a bad callback result. Expected single boolean or [boolean, string], got: ',
+                                callbackResult
+                            )
+                            return INTERNAL_ERROR('Internal error')
+                        }
+                        const [success, message] = callbackResult
+                        if (!success) {
+                            return CALLBACK_FAILED(message)
+                        }
+                    }
                 }
 
                 encounteredKeys.add(key)
