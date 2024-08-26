@@ -1,6 +1,6 @@
 import { FailedValidation, SuccessfulValidation } from './ValidationResults'
 
-type SupportedTypes = 'string' | 'number' | 'boolean' | 'object' | 'array'
+type SupportedTypes = 'string' | 'number' | 'boolean' | 'object' | 'array' | 'null'
 
 export interface SchemaFieldDefinition {
     typesToCheck: Array<SupportedTypes>

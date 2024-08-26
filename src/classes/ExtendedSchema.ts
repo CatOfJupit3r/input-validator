@@ -106,6 +106,9 @@ export class ExtendedSchema<ImpliedType> implements SchemaBlueprint<ImpliedType>
                         // because typeof [] === 'object'
                         continue
                     }
+                    if (typeToCheck === 'null' && valueToCheck === null) {
+                        continue
+                    }
                     if (typeToCheck === 'extSchema' && valueIsObject(valueToCheck)) {
                         if (!('schema' in field) || field?.schema === undefined) {
                             return INTERNAL_ERROR('Schema is not defined for key: ' + key)

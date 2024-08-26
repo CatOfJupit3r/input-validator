@@ -1,6 +1,6 @@
 import { FailedValidation, SuccessfulValidation } from './ValidationResults'
 
-export type SupportedTypes = 'string' | 'number' | 'boolean' | 'object' | 'array' | 'any'
+export type SupportedTypes = 'string' | 'number' | 'boolean' | 'object' | 'array' | 'null' | 'any'
 
 export type TypeMapping = {
     string: string
@@ -8,6 +8,7 @@ export type TypeMapping = {
     boolean: boolean
     object: Record<string, unknown>
     array: any[]
+    null: null
     any: any
 }
 
