@@ -37,8 +37,8 @@ describe('Extended Schema', () => {
         schema.addRegexField('phone', /^(\([0-9]{3}\) |[0-9]{3}-)[0-9]{3}-[0-9]{4}$/gm, {
             displayedAs: 'US phone number',
         })
-        schema.addNumberOrNullField('children')
-        schema.addStringOrNullField('jobTitle')
+        schema.addNullableField('children', ['number'])
+        schema.addNullableField('jobTitle', ['string'])
 
         const addressSchema = new ExtendedSchema<{ notifications: boolean; theme: string }>()
         addressSchema.addBooleanField('notifications')

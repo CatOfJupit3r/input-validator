@@ -1,7 +1,7 @@
 import {
     NestedSchemaField,
     SchemaBlueprint,
-    SchemaFieldDefinition,
+    SchemaFieldDefinition, SupportedTypes,
     ValidationRules,
 } from '../models/ExtendedSchemaTypes'
 import {
@@ -230,17 +230,10 @@ export class ExtendedSchema<ImpliedType> implements SchemaBlueprint<ImpliedType>
         })
     }
 
-    public addNumberOrNullField(key: string, options?: addFieldOptions<number | null>): void {
+    public addNullableField(key: string, otherTypes: Omit<SupportedTypes[], 'null'>, options?: addFieldOptions<any>): void {
         this.addField(key, {
             ...options,
-            typesToCheck: ['number', 'null'],
-        })
-    }
-
-    public addStringOrNullField(key: string, options?: addFieldOptions<string | null>): void {
-        this.addField(key, {
-            ...options,
-            typesToCheck: ['string', 'null'],
+            typesToCheck: [...otherTypes, 'null'],
         })
     }
 

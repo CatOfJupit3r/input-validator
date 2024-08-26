@@ -1,6 +1,6 @@
 import { FailedValidation, SuccessfulValidation } from './ValidationResults'
 
-type SupportedTypes = 'string' | 'number' | 'boolean' | 'object' | 'array' | 'null'
+export type SupportedTypes = 'string' | 'number' | 'boolean' | 'object' | 'array' | 'null'
 
 type SchemaCallback = (value: any) => boolean | [boolean, string]
 
