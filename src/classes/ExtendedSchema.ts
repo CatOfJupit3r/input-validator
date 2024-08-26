@@ -98,19 +98,23 @@ export class ExtendedSchema<ImpliedType> implements SchemaBlueprint<ImpliedType>
                 }
 
                 const type = typeof valueToCheck
-
+                let foundType = false
                 for (const typeToCheck of field.typesToCheck) {
                     if (type === typeToCheck) {
-                        continue
+                        foundType = true
+                        // continue
                     }
                     if (typeToCheck === 'array' && Array.isArray(valueToCheck)) {
                         // because typeof [] === 'object'
+                        foundType = true
                         continue
                     }
                     if (typeToCheck === 'null' && valueToCheck === null) {
+                        foundType = true
                         continue
                     }
                     if (typeToCheck === 'extSchema' && valueIsObject(valueToCheck)) {
+                        // extSchema does not support alternative types, so we can return early
                         if (!('schema' in field) || field?.schema === undefined) {
                             return INTERNAL_ERROR('Schema is not defined for key: ' + key)
                         }
@@ -119,11 +123,15 @@ export class ExtendedSchema<ImpliedType> implements SchemaBlueprint<ImpliedType>
                         if (!result.success) {
                             return WRONG_TYPE_INPUT('Nested schema failed. Key: ' + key)
                         }
+                        foundType = true
                         continue
                     }
-                    if ((typeToCheck === 'object' || typeToCheck === 'extSchema') && valueIsObject(valueToCheck)) {
-                        continue
+                    if (typeToCheck === 'object' && valueIsObject(valueToCheck)) {
+                        foundType = true
                     }
+                }
+
+                if (!foundType) {
                     return WRONG_TYPE_INPUT('Type mismatch. Key: ' + key)
                 }
 
@@ -203,37 +211,50 @@ export class ExtendedSchema<ImpliedType> implements SchemaBlueprint<ImpliedType>
 
     public addStringField(key: string, options?: addFieldOptions<string>): void {
         this.addField(key, {
-            typesToCheck: ['string'],
-            callback: options?.callback,
-            undefined: options?.undefined,
-            displayedAs: options?.displayedAs,
+            ...options,
+            typesToCheck: ['string']
         })
     }
 
     public addNumberField(key: string, options?: addFieldOptions<number>): void {
         this.addField(key, {
-            typesToCheck: ['number'],
-            callback: options?.callback,
-            undefined: options?.undefined,
-            displayedAs: options?.displayedAs,
+            ...options,
+            typesToCheck: ['number']
+        })
+    }
+
+    public addNullField(key: string, options?: addFieldOptions<null>): void {
+        this.addField(key, {
+            ...options,
+            typesToCheck: ['null']
+        })
+    }
+
+    public addNumberOrNullField(key: string, options?: addFieldOptions<number | null>): void {
+        this.addField(key, {
+            ...options,
+            typesToCheck: ['number', 'null'],
+        })
+    }
+
+    public addStringOrNullField(key: string, options?: addFieldOptions<string | null>): void {
+        this.addField(key, {
+            ...options,
+            typesToCheck: ['string', 'null'],
         })
     }
 
     public addBooleanField(key: string, options?: addFieldOptions<boolean>): void {
         this.addField(key, {
+            ...options,
             typesToCheck: ['boolean'],
-            callback: options?.callback,
-            undefined: options?.undefined,
-            displayedAs: options?.displayedAs,
         })
     }
 
     public addArrayField(key: string, options?: addFieldOptions<Array<any>>): void {
         this.addField(key, {
+            ...options,
             typesToCheck: ['array'],
-            callback: options?.callback,
-            undefined: options?.undefined,
-            displayedAs: options?.displayedAs,
         })
     }
 
@@ -246,6 +267,7 @@ export class ExtendedSchema<ImpliedType> implements SchemaBlueprint<ImpliedType>
 
     public addRegexField(key: string, regex: RegExp, options?: addFieldOptions<string>): void {
         this.addField(key, {
+            ...options,
             typesToCheck: ['string'],
             callback: (value: any) => {
                 if (!regex.test(value)) {
@@ -253,27 +275,26 @@ export class ExtendedSchema<ImpliedType> implements SchemaBlueprint<ImpliedType>
                 }
                 return options?.callback ? options.callback(value) : true
             },
-            undefined: options?.undefined,
             displayedAs: options?.displayedAs || 'REGEX string', // we do not want to leak regexes
         })
     }
 
     public addFalsyField(key: string, options?: addFieldOptions<boolean>): void {
         this.addBooleanField(key, {
+            ...options,
             callback: (value: any) => {
                 return !value
             },
-            undefined: options?.undefined,
             displayedAs: options?.displayedAs || 'false',
         })
     }
 
     public addTruthyField(key: string, options?: addFieldOptions<boolean>): void {
         this.addBooleanField(key, {
+            ...options,
             callback: (value: any) => {
                 return !!value
             },
-            undefined: options?.undefined,
             displayedAs: options?.displayedAs || 'true',
         })
     }
@@ -284,6 +305,7 @@ export class ExtendedSchema<ImpliedType> implements SchemaBlueprint<ImpliedType>
         options?: addFieldOptions<Array<K>>
     ): void {
         this.addArrayField(key, {
+            ...options,
             callback: (value: Array<K>) => {
                 if (!Array.isArray(value)) {
                     return false
@@ -296,7 +318,6 @@ export class ExtendedSchema<ImpliedType> implements SchemaBlueprint<ImpliedType>
                 }
                 return !options?.callback || options.callback(value)
             },
-            undefined: options?.undefined,
             displayedAs: options?.displayedAs || 'array<' + JSON.stringify(elementSchema.toJSON()) + '>',
         })
     }

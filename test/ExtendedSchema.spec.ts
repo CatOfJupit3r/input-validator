@@ -5,6 +5,8 @@ interface TestSchemaInterface {
     email: string
     age: number
     phone: string
+    children: number | null
+    jobTitle: string | null
 
     address: {
         notifications: boolean
@@ -16,6 +18,7 @@ interface TestSchemaInterface {
         age: number
     }[]
     isMale?: boolean
+    reserved: null
 }
 
 /*
@@ -34,6 +37,9 @@ describe('Extended Schema', () => {
         schema.addRegexField('phone', /^(\([0-9]{3}\) |[0-9]{3}-)[0-9]{3}-[0-9]{4}$/gm, {
             displayedAs: 'US phone number',
         })
+        schema.addNumberOrNullField('children')
+        schema.addStringOrNullField('jobTitle')
+
         const addressSchema = new ExtendedSchema<{ notifications: boolean; theme: string }>()
         addressSchema.addBooleanField('notifications')
         addressSchema.addStringField('theme')
@@ -54,12 +60,15 @@ describe('Extended Schema', () => {
             callback: value => true,
             undefined: 'allow',
         })
+        schema.addNullField('reserved')
 
         const objectToCheck = {
             name: 'John',
             email: 'fakeemail@gmail.com',
             age: 30,
             phone: '123-456-7890',
+            children: null,
+            jobTitle: null,
             address: {
                 notifications: true,
                 theme: 'dark',
@@ -75,6 +84,7 @@ describe('Extended Schema', () => {
                     age: 35,
                 },
             ],
+            reserved: null,
         }
 
         const result = schema.check(objectToCheck)
@@ -83,16 +93,19 @@ describe('Extended Schema', () => {
             success: true,
             value: objectToCheck,
         } as SuccessfulValidation<TestSchemaInterface>)
-        expect(schema.length()).toBe(8)
+        expect(schema.length()).toBe(11)
         expect(schema.toJSON()).toEqual({
             name: 'string',
             age: 'number',
             email: 'email',
+            children: 'number | null',
+            jobTitle: 'string | null',
             phone: 'US phone number',
             address: { notifications: 'boolean', theme: 'string' },
             groups: 'array (callback)',
             friends: 'array<{"name":"string","age":"number"}>',
             'isMale?': 'false',
+            reserved: 'null',
         })
     })
 
