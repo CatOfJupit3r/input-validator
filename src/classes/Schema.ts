@@ -95,4 +95,8 @@ export class Schema<T extends SchemaDefinition> implements SchemaBlueprint<T> {
     public length(): number {
         return Object.keys(this.schema).length
     }
+
+    public toJSON(): Record<string, unknown> {
+        return this.schema
+    }
 }

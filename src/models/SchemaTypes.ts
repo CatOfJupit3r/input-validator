@@ -23,6 +23,7 @@ export type Input<T extends SchemaDefinition> = {
 export type SchemaBlueprint<T extends SchemaDefinition> = {
     check(value: Input<T>): FailedValidation | SuccessfulValidation<{ [K in keyof T]: TypeMapping[T[K]] }>
     length(): number
+    toJSON(): Record<string, unknown>
 }
 
 type EXCESS_ALLOW_FLAGS = 'keep' | 'clean' | 'forbid'

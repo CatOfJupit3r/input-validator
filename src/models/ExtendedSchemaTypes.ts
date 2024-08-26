@@ -8,6 +8,7 @@ export interface SchemaFieldDefinition {
     typesToCheck: Array<SupportedTypes>
     callback?: SchemaCallback
     undefined?: 'allow' | 'forbid'
+    displayedAs?: string
 }
 
 export interface NestedSchemaField {
@@ -19,10 +20,9 @@ export interface NestedSchemaField {
 
 export interface SchemaBlueprint<ImpliedType> {
     addField(key: string, type: SchemaFieldDefinition): void
-
     check(value: any): SuccessfulValidation<ImpliedType> | FailedValidation
-
     length(): number
+    toJSON(): Record<string, unknown>
 }
 
 type EXCESS_ALLOW_FLAGS = 'keep' | 'clean' | 'forbid'

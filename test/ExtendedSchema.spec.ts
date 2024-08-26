@@ -31,7 +31,9 @@ describe('Extended Schema', () => {
         schema.addStringField('name')
         schema.addNumberField('age')
         schema.addEmailField('email')
-        schema.addRegexField('phone', /^(\([0-9]{3}\) |[0-9]{3}-)[0-9]{3}-[0-9]{4}$/gm)
+        schema.addRegexField('phone', /^(\([0-9]{3}\) |[0-9]{3}-)[0-9]{3}-[0-9]{4}$/gm, {
+            displayedAs: 'US phone number',
+        })
         const addressSchema = new ExtendedSchema<{ notifications: boolean; theme: string }>()
         addressSchema.addBooleanField('notifications')
         addressSchema.addStringField('theme')
@@ -81,6 +83,17 @@ describe('Extended Schema', () => {
             success: true,
             value: objectToCheck,
         } as SuccessfulValidation<TestSchemaInterface>)
+        expect(schema.length()).toBe(8)
+        expect(schema.toJSON()).toEqual({
+            name: 'string',
+            age: 'number',
+            email: 'email',
+            phone: 'US phone number',
+            address: { notifications: 'boolean', theme: 'string' },
+            groups: 'array (callback)',
+            friends: 'array<{"name":"string","age":"number"}>',
+            'isMale?': 'false',
+        })
     })
 
     test('Schema cleans excess keys on rule', () => {
