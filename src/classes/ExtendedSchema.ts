@@ -192,7 +192,7 @@ export class ExtendedSchema<ImpliedType> implements SchemaBlueprint<ImpliedType>
                 if (displayedAs) {
                     result[fieldKey] = displayedAs
                 } else {
-                    let keyTypes = typesToCheck.join('| ')
+                    let keyTypes = typesToCheck.join(' | ')
                     if (callback) {
                         keyTypes += ' (callback)'
                     }
